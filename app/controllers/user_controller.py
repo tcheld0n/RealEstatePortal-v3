@@ -76,3 +76,9 @@ class UserController:
             print("Nenhum agente cadastrado.")
         for agent in agents:
             print(agent)
+
+    def find_user_by_id(self, user_id):
+        for user in db.get_users():
+            if user.id == user_id:
+                return user
+        return None

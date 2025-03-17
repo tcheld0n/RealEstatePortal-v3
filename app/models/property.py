@@ -3,18 +3,19 @@ from geopy.geocoders import Nominatim
 geolocator = Nominatim(user_agent="myGeocoder")
 
 class Property:
-    def __init__(self, id, title, description, price, location, property_type, agent, virtual_tour_url=None):
+    def __init__(self, id, title, description, price, location, property_category, transaction_type, agent, virtual_tour_url=None):
         self._id = id
         self.title = title
         self.description = description
         self.price = price
         self.location = location
-        self.property_type = property_type
+        self.property_category = property_category
+        self.transaction_type = transaction_type
         self._agent = agent
         self._available = True
         self.virtual_tour_url = virtual_tour_url
 
-    # Utilizando as validações diretamente nos setters
+    # Validações e getters/setters
     @property
     def title(self):
         return self._title
@@ -24,6 +25,16 @@ class Property:
         if not value:
             raise ValueError("Título não pode ser vazio.")
         self._title = value
+
+    @property
+    def description(self):
+        return self._description
+
+    @description.setter
+    def description(self, value):
+        if not value:
+            raise ValueError("Descrição não pode ser vazia.")
+        self._description = value
 
     @property
     def price(self):
@@ -46,17 +57,55 @@ class Property:
         self._location = value
 
     @property
-    def property_type(self):
-        return self._property_type
+    def property_category(self):
+        return self._property_category
 
-    @property_type.setter
-    def property_type(self, value):
-        valid_types = {"sale", "rent"}
-        if value not in valid_types:
-            raise ValueError(f"Tipo inválido. Use: {valid_types}")
-        self._property_type = value
+    @property_category.setter
+    def property_category(self, value):
+        valid_categories = {"Casa", "Apartamento", "Terreno"}
+        if value not in valid_categories:
+            raise ValueError(f"Categoria inválida. Use: {valid_categories}")
+        self._property_category = value
 
-    # Removido os métodos estáticos, pois o validador já está no setter
+    @property
+    def transaction_type(self):
+        return self._transaction_type
+
+    @transaction_type.setter
+    def transaction_type(self, value):
+        valid_transactions = {"Venda", "Aluguel"}
+        if value not in valid_transactions:
+            raise ValueError(f"Transação inválida. Use: {valid_transactions}")
+        self._transaction_type = value
+
+    @property
+    def agent(self):
+        return self._agent
+
+    @agent.setter
+    def agent(self, value):
+        if not value:
+            raise ValueError("Agente não pode ser vazio.")
+        self._agent = value
+
+    @property
+    def available(self):
+        return self._available
+
+    @available.setter
+    def available(self, value):
+        if not isinstance(value, bool):
+            raise ValueError("Disponibilidade deve ser um valor booleano.")
+        self._available = value
+
+    @property
+    def virtual_tour_url(self):
+        return self._virtual_tour_url
+
+    @virtual_tour_url.setter
+    def virtual_tour_url(self, value):
+        self._virtual_tour_url = value
+
     def remove_virtual_tour(self):
         self.virtual_tour_url = None
 
@@ -68,40 +117,41 @@ class Property:
     def switch_status(self):
         self._available = not self._available
 
-    # Método para obter coordenadas via geopy (latitude e longitude)
     def get_coordinates(self):
         location = geolocator.geocode(self.location)
         if location:
             return location.latitude, location.longitude
         return None, None
 
-    # Método para gerar o link do Google Maps
     def get_google_maps_link(self):
         latitude, longitude = self.get_coordinates()
         if latitude and longitude:
             return f"https://www.google.com/maps?q={latitude},{longitude}"
         return "Localização não encontrada"
 
-    def to_dict(self):
-        return {
-            "id": self._id,
-            "title": self._title,
-            "description": self._description,
-            "price": self._price,
-            "location": self._location,
-            "property_type": self._property_type,
-            "agent": self._agent.name,
-            "available": self._available,
-            "virtual_tour_url": self.virtual_tour_url,
-        }
+    # def to_dict(self):
+    #     return {
+    #         "id": self._id,
+    #         "title": self._title,
+    #         "description": self._description,
+    #         "price": self._price,
+    #         "location": self._location,
+    #         "property_category": self._property_category,
+    #         "transaction_type": self._transaction_type,
+    #         "agent": self._agent.name,
+    #         "available": self._available,
+    #         "virtual_tour_url": self.virtual_tour_url,
+    #     }
 
     def __str__(self):
         return (
+            f"ID: {self._id}\n"
             f"Propriedade: {self._title}\n"
             f"Descrição: {self._description}\n"
             f"Preço: R${self._price}\n"
             f"Localização: {self._location}\n"
-            f"Tipo: {self._property_type}\n"
+            f"Categoria: {self._property_category}\n"
+            f"Transação: {'Venda' if self._transaction_type == 'Venda' else 'Aluguel'}\n"
             f"Disponível: {'Sim' if self._available else 'Não'}\n"
-            f"Tour Virtual: {self.virtual_tour_url if self.virtual_tour_url else 'Nenhum'}"
+            f"Tour Virtual: {self.virtual_tour_url if self.virtual_tour_url else 'Nenhum'}\n"
         )
