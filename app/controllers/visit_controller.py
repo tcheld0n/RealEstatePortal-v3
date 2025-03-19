@@ -8,25 +8,19 @@ class VisitController:
         self.property_controller = property_controller  # Instância de PropertyController
         self.user_controller = user_controller  # Instância de UserController
 
-    def schedule_visit(self, id, client_id, agent_id, property_id, date_time):
-        # Busca o cliente usando o UserController
-        client = self.user_controller.find_user_by_id(client_id)
-        # if not client or not isinstance("cliente", Client):  # Verifica se é um cliente
-        #     raise ValueError("Cliente não encontrado.")
-        # if client.get_role() != "client":
-        #     raise ValueError("Cliente não encontrado.")
-        #
-        # # Busca o agente usando o UserController
-        # agent = self.user_controller.find_user_by_id(agent_id)
-        # # if not agent or not isinstance(agent, Agent):  # Verifica se é um agente
-        # #     raise ValueError("Agente não encontrado.")
-        # if agent.get_role() != "agent":
-        #     raise ValueError("Agente não encontrado.")
-
+    def schedule_visit(self, id, client_id, property_id, date_time):
         # Busca a propriedade usando o PropertyController
         property_obj = self.property_controller.find_property_by_id(property_id)
         if not property_obj:
             raise ValueError("Propriedade não encontrada.")
+
+        # Obtém o agente associado à propriedade
+        agent = property_obj.agent  # Supondo que a propriedade tenha um atributo 'agent'
+
+        # Busca o cliente usando o UserController
+        client = self.user_controller.find_user_by_id(client_id)
+        if not client:
+            raise ValueError("Cliente não encontrado.")
 
         # Cria a visita
         new_visit = Visit(id, client, agent, property_obj, date_time)

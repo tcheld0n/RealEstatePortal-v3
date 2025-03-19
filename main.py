@@ -4,6 +4,7 @@ from app.controllers.mortgage_controller import MortgageController
 from app.controllers.visit_controller import VisitController
 from app.controllers.market_analysis_controller import MarketAnalysisController
 from app.controllers.review_controller import ReviewController
+from app.models.property import Property
 from app.data.database import db
 
 def menu():
@@ -42,7 +43,6 @@ def menu():
             elif option == "2":
                 logged_user = user_controller.login()
 
-
             elif option == "3":
                 if logged_user is None:
                     print("Erro: Nenhum usuário logado.")
@@ -53,15 +53,16 @@ def menu():
                     description = input("Digite a descrição da propriedade: ")
                     price = float(input("Digite o preço da propriedade: "))
                     location = input("Digite a localização da propriedade: ")
-                    property_category = input("Digite o tipo do imóvel (Casa/Apartamento/Terreno): ")
+                    property_category = input("Digite o tipo do imóvel (Casa/Apartamento/Terreno): ").capitalize()
                     while property_category not in {"Casa", "Apartamento", "Terreno"}:
                         print("Erro: Categoria inválida. Use: Casa, Apartamento ou Terreno.")
                         property_category = input("Digite o tipo do imóvel (Casa/Apartamento/Terreno): ")
-                    transaction_type = input("Digite o tipo de transação (Venda/Aluguel): ")
+                    transaction_type = input("Digite o tipo de transação (Venda/Aluguel): ").capitalize()
                     while transaction_type not in {"Venda", "Aluguel"}:
                         print("Erro: Transação inválida. Use: Venda ou Aluguel.")
                         transaction_type = input("Digite o tipo de transação (Venda/Aluguel): ")
-                    new_property = property_controller.add_property(
+
+                    new_property = Property(
                         id=None,
                         title=title,
                         description=description,
@@ -71,6 +72,7 @@ def menu():
                         transaction_type=transaction_type,
                         agent=logged_user
                     )
+                    property_controller.add_property(new_property)
                     print(f"Propriedade '{new_property.title}' cadastrada com sucesso!")
 
             elif option == "4":
@@ -123,7 +125,6 @@ def menu():
                     new_visit = visit_controller.schedule_visit(
                         id=len(db.get_visits()) + 1,
                         client_id=logged_user.id,
-                        agent_id=logged_user.id,  # O agente pode ser o próprio usuário logado ou outro
                         property_id=property_id,
                         date_time=date_time
                     )
@@ -138,11 +139,10 @@ def menu():
                     print("Erro: Nenhum usuário logado.")
                 else:
                     property_id = int(input("Digite o ID da propriedade para avaliar: "))
-                    rating = int(input("Digite a nota de avaliação (1-5): "))
+                    rating = float(input("Digite a nota de avaliação (1-5): "))
                     comment = input("Digite um comentário (opcional): ")
                     # Adicionar avaliação usando o ReviewController
                     new_review = review_controller.add_review(
-                        id=len(db.get_reviews()) + 1,
                         reviewer_id=logged_user.id,
                         property_id=property_id,
                         rating=rating,
@@ -153,19 +153,20 @@ def menu():
                     else:
                         print("Erro ao adicionar a avaliação.")
 
-            elif option == "8":
-                print("\n===== Exibir Avaliações =====")
-                property_id = int(input("Digite o ID da propriedade para exibir avaliações: "))
-
-                # Obter avaliações usando o ReviewController
-                reviews = review_controller.get_reviews_by_property()
+            if option == "8":  # Opção "Exibir Avaliações"
+                print("===== Exibir Avaliações =====")
+                reviews = review_controller.list_all_reviews()
                 if reviews:
-                    print("Avaliações:")
+                    print("Todas as avaliações cadastradas:")
                     for review in reviews:
                         print(
-                            f"Cliente {review['reviewer_id']} - Nota: {review['rating']} - Comentário: {review['comment']}")
+                            f"\nPropriedade ID: {review.property_id}, "  
+                            f"\nNota: {review.rating}, "
+                            f"\nComentário: {review.comment}, "
+                            f"\nData: {review.date}"
+                        )
                 else:
-                    print("Nenhuma avaliação encontrada.")
+                    print("Nenhuma avaliação cadastrada.")
 
             elif option == "9":
                 print("\n===== Análise de Mercado =====")
@@ -189,9 +190,9 @@ def menu():
             elif option == "0":
                 print("Saindo do sistema...")
                 break
-
-            else:
-                print("Opção inválida.")
+            #
+            # else:
+            #     print("============================")
 
         except Exception as e:
             print(f"\nErro inesperado: {e}")

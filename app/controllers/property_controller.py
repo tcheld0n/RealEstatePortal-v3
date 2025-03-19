@@ -5,17 +5,13 @@ class PropertyController:
     def __init__(self):
         self._properties = db.get_properties()
 
-    def add_property(self, id, title, description, price, location, property_category, transaction_type, agent):
-
-        # Verifica se a propriedade já existe
-        if any(prop.id == id for prop in self._properties):
+    def add_property(self, property: Property):
+        # Verifica se já existe uma propriedade com o mesmo título e localização
+        if any(prop.title == property.title and prop.location == property.location for prop in self._properties):
             raise ValueError("Propriedade já cadastrada.")
-
-        new_property = Property(id, title, description, price, location, property_category, transaction_type, agent)
-        db.add_property(new_property)               # Adiciona ao banco de dados
-        agent.add_property(new_property)            # Associa ao agente
-        self._properties.append(new_property)       # Atualiza a lista local de propriedades
-        return new_property
+        db.add_property(property)               # Adiciona a propriedade ao banco de dados
+        self._properties = db.get_properties()  # Adiciona a propriedade à lista local
+        return property
 
     def list_properties(self):
         return [vars(prop) for prop in self._properties]

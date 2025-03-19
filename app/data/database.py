@@ -10,7 +10,7 @@ class Database:
         self.properties = []    # Lista de propriedades
         self.visits = []        # Lista de visitas agendadas
         self.reviews = []       # Lista de avaliações
-        self._next_property_id = 4
+        self._next_property_id = 1
 
         # Inicializa os dados do banco de dados
         self.initialize_data()
@@ -37,7 +37,6 @@ class Database:
         if any(prop.title == property.title and prop.location == property.location for prop in self.properties):
             raise ValueError("Propriedade já cadastrada.")
 
-        #Adiciona cada propriedade com um ID único
         property._id = self._next_property_id
         self.properties.append(property)
         self._next_property_id += 1
@@ -62,7 +61,7 @@ class Database:
     def get_reviews(self):
         return self.reviews
 
-    # Método para inicializar o banco de dados com propriedades predefinidas
+    # Database inicial de propriedades
     def initialize_data(self):
         # Propriedades predefinidas
         properties = [

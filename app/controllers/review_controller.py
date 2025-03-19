@@ -3,7 +3,10 @@ from app.models.review import Review
 from app.controllers.property_controller import PropertyController
 
 class ReviewController:
-    def add_review(self, id, reviewer_id, property_id, rating, comment):
+    def __init__(self):
+        self.reviews = db.get_reviews() # Carrega as avaliações do banco de dados
+
+    def add_review(self, reviewer_id, property_id, rating, comment):
         # Validação da nota
         if rating < 1 or rating > 5:
             raise ValueError("A nota deve estar entre 1 e 5.")
@@ -14,7 +17,7 @@ class ReviewController:
             raise ValueError("Propriedade não encontrada.")
 
         # Cria e adiciona a avaliação
-        new_review = Review(id, reviewer_id, property_id, rating, comment)
+        new_review = Review(property_id, reviewer_id, rating, comment)
         db.add_review(new_review)
         return new_review
 
@@ -33,6 +36,9 @@ class ReviewController:
             db.reviews.remove(review_to_delete)
             return True
         return False
+
+    def list_all_reviews(self):
+        return db.get_reviews()
 
     def get_reviews_by_property(self, property_id):
         return [review for review in db.reviews if review.property_id == property_id]

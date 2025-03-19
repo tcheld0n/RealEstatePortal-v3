@@ -78,6 +78,11 @@ class Property:
             raise ValueError(f"Transação inválida. Use: {valid_transactions}")
         self._transaction_type = value
 
+    # Ajuste para acessar o ID
+    @property
+    def id(self):
+        return self._id
+
     @property
     def agent(self):
         return self._agent
@@ -128,20 +133,6 @@ class Property:
         if latitude and longitude:
             return f"https://www.google.com/maps?q={latitude},{longitude}"
         return "Localização não encontrada"
-
-    # def to_dict(self):
-    #     return {
-    #         "id": self._id,
-    #         "title": self._title,
-    #         "description": self._description,
-    #         "price": self._price,
-    #         "location": self._location,
-    #         "property_category": self._property_category,
-    #         "transaction_type": self._transaction_type,
-    #         "agent": self._agent.name,
-    #         "available": self._available,
-    #         "virtual_tour_url": self.virtual_tour_url,
-    #     }
 
     def __str__(self):
         return (
