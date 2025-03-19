@@ -1,7 +1,5 @@
 from app.data.database import db
 from app.models.visit import Visit
-from app.models.client import Client
-from app.models.agent import Agent
 
 class VisitController:
     def __init__(self, property_controller, user_controller):
@@ -28,17 +26,24 @@ class VisitController:
         return new_visit
 
     def list_visits(self):
-        return [vars(visit) for visit in db.visits]
+        return db.get_visits()  # Retorna todas as visitas do banco de dados
 
     def find_visit_by_id(self, visit_id):
-        for visit in db.visits:
-            if visit.id == visit_id:
+        for visit in db.get_visits():
+            if visit._id == visit_id:
                 return visit
         return None
 
     def cancel_visit(self, visit_id):
         visit_to_cancel = self.find_visit_by_id(visit_id)
         if visit_to_cancel:
-            db.visits.remove(visit_to_cancel)
+            visit_to_cancel.cancel()  # Altera o status para "Cancelado!"
+            return True
+        return False
+
+    def reschedule_visit(self, visit_id, new_date_time):
+        visit_to_reschedule = self.find_visit_by_id(visit_id)
+        if visit_to_reschedule:
+            visit_to_reschedule.reschedule(new_date_time)  # Reagenda a visita
             return True
         return False

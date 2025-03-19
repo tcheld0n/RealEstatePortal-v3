@@ -1,5 +1,7 @@
 class Visit:
     def __init__(self, id, client, agent, property, date_time):
+        if not all([client, agent, property, date_time]):
+            raise ValueError("Todos os campos (cliente, agente, propriedade, data/hora) são obrigatórios.")
         self._id = id
         self._client = client
         self._agent = agent

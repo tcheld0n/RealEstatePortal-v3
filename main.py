@@ -7,6 +7,66 @@ from app.controllers.review_controller import ReviewController
 from app.models.property import Property
 from app.data.database import db
 
+def agendamento_menu(logged_user, visit_controller):
+    while True:
+        print("\n===== Agendamento de Compromissos =====")
+        print("1. Agendar visita")
+        print("2. Listar visitas marcadas")
+        print("3. Cancelar visita")
+        print("4. Reagendar visita")
+        print("5. Voltar ao menu principal")
+        option = input("Escolha uma opção: ")
+
+        if option == "1":
+            print("\n===== Agendar Visita =====")
+            if logged_user is None:
+                print("Erro: Nenhum usuário logado.")
+            else:
+                property_id = int(input("Digite o ID da propriedade para agendar visita: "))
+                date_time = input("Digite a data e hora para a visita (ex: 2025-03-14 10:00): ")
+
+                # Agendar visita
+                try:
+                    new_visit = visit_controller.schedule_visit(
+                        id=len(db.get_visits()) + 1,
+                        client_id=logged_user.id,
+                        property_id=property_id,
+                        date_time=date_time
+                    )
+                    print(f"Visita agendada com sucesso!\n{new_visit}")
+                except ValueError as e:
+                    print(f"Erro ao agendar a visita: {e}")
+
+        elif option == "2":
+            print("\n===== Visitas Marcadas =====")
+            visits = visit_controller.list_visits()
+            if visits:
+                for visit in visits:
+                    print(visit)
+            else:
+                print("Nenhuma visita marcada.")
+
+        elif option == "3":
+            visit_id = int(input("Digite o ID da visita que deseja cancelar: "))
+            if visit_controller.cancel_visit(visit_id):
+                print("Visita cancelada com sucesso.")
+            else:
+                print("Visita não encontrada.")
+
+        elif option == "4":
+            visit_id = int(input("Digite o ID da visita que deseja reagendar: "))
+            new_date_time = input("Digite a nova data e hora (ex: 2025-03-15 14:00): ")
+            if visit_controller.reschedule_visit(visit_id, new_date_time):
+                print("Visita reagendada com sucesso.")
+            else:
+                print("Visita não encontrada.")
+
+        elif option == "5":
+            break  # Volta ao menu principal
+
+        else:
+            print("Opção inválida. Tente novamente.")
+
 def menu():
     user_controller = UserController()
     property_controller = PropertyController()
@@ -112,24 +172,7 @@ def menu():
                 print(f"Valor total do financiamento: R$ {mortgage.total_payment:.2f}")
 
             elif option == "6":
-                print("\n===== Agendar Visita =====")
-                if logged_user is None:
-                    print("Erro: Nenhum usuário logado.")
-                else:
-                    property_id = int(input("Digite o ID da propriedade para agendar visita: "))
-                    date_time = input("Digite a data e hora para a visita (ex: 2025-03-14 10:00): ")
-
-                    # Agendar visita
-                    new_visit = visit_controller.schedule_visit(
-                        id=len(db.get_visits()) + 1,
-                        client_id=logged_user.id,
-                        property_id=property_id,
-                        date_time=date_time
-                    )
-                    if new_visit:
-                        print("Visita agendada com sucesso!")
-                    else:
-                        print("Erro ao agendar a visita. Verifique a disponibilidade.")
+                agendamento_menu(logged_user, visit_controller)  # Chama o menu de agendamento
 
             elif option == "7":
                 print("\n===== Avaliar Propriedade =====")
@@ -151,14 +194,14 @@ def menu():
                     else:
                         print("Erro ao adicionar a avaliação.")
 
-            if option == "8":  # Opção "Exibir Avaliações"
+            elif option == "8":
                 print("===== Exibir Avaliações =====")
                 reviews = review_controller.list_all_reviews()
                 if reviews:
                     print("Todas as avaliações cadastradas:")
                     for review in reviews:
                         print(
-                            f"\nPropriedade ID: {review.property_id}, "  
+                            f"\nPropriedade ID: {review.property_id}, "
                             f"\nNota: {review.rating}, "
                             f"\nComentário: {review.comment}, "
                             f"\nData: {review.date}"
@@ -188,9 +231,9 @@ def menu():
             elif option == "0":
                 print("Saindo do sistema...")
                 break
-            #
-            # else:
-            #     print("============================")
+
+            else:
+                print("Opção inválida. Tente novamente.")
 
         except Exception as e:
             print(f"\nErro inesperado: {e}")
