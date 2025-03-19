@@ -101,17 +101,15 @@ def menu():
                     print("Nenhuma propriedade encontrada.")
 
             elif option == "5":
-                # Calcular Financiamento
                 print("\n===== Calcular Financiamento =====")
                 price = float(input("Digite o preço do imóvel: "))
                 interest_rate = float(input("Digite a taxa de juros anual (em %): "))
                 years = int(input("Digite o período de pagamento (em anos): "))
 
-                # Calcula o financiamento diretamente
                 mortgage = mortgage_controller.calculate_mortgage(price, interest_rate, years)
 
-                # Exibe o resultado com base no atributo monthly_payment
-                print(f"\nO valor da parcela mensal será: R$ {mortgage.monthly_payment:.2f}")
+                print(f"\nValor da parcela mensal: R$ {mortgage.monthly_payment:.2f}")
+                print(f"Valor total do financiamento: R$ {mortgage.total_payment:.2f}")
 
             elif option == "6":
                 print("\n===== Agendar Visita =====")

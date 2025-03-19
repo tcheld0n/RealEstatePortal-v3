@@ -1,31 +1,28 @@
-from app.models.market_analysis import MarketAnalysis
-from app.data.database import db
-
 class MarketAnalysisController:
     def __init__(self, property_controller):
         self.property_controller = property_controller
-        # Passando o property_controller para a instância do MarketAnalysis
-        self.market_analysis = MarketAnalysis(self.property_controller)
 
     def get_market_analysis(self, location):
-        # Filtrando as propriedades pela localização
-        propriedades_na_localizacao = [prop for prop in db.get_properties() if
-                                       prop.location.lower() == location.lower()]
+        # Obtém todas as propriedades na localização selecionada
+        properties = self.property_controller.search_property_by_location(location)
 
-        if not propriedades_na_localizacao:
+        if not properties:
             return None
 
-        # Calculando preço médio
-        precos = [prop.price for prop in propriedades_na_localizacao]
-        preco_medio = sum(precos) / len(precos)
+        # Filtra propriedades à venda e para aluguel
+        properties_for_sale = [p for p in properties if p.transaction_type == "Venda"]
+        properties_for_rent = [p for p in properties if p.transaction_type == "Aluguel"]
 
-        # Contando número de imóveis para venda e aluguel
-        num_venda = sum(1 for prop in propriedades_na_localizacao if prop.property_type == "sale")
-        num_aluguel = sum(1 for prop in propriedades_na_localizacao if prop.property_type == "rent")
+        # Calcula o preço médio
+        total_price = sum(p.price for p in properties)
+        avg_price = total_price / len(properties)
 
-        # Retorna a análise de mercado
+        # Conta o número de propriedades à venda e para aluguel
+        num_sale = len(properties_for_sale)
+        num_rent = len(properties_for_rent)
+
         return {
-            "Preço Médio": preco_medio,
-            "Propriedades à venda": num_venda,
-            "Propriedades para aluguel": num_aluguel
+            "avg_price": avg_price,
+            "num_sale": num_sale,
+            "num_rent": num_rent     
         }
